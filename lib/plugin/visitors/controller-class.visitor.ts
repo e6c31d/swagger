@@ -41,7 +41,6 @@ export class ControllerClassVisitor extends AbstractFileVisitor {
             node,
             typeChecker,
             options,
-            sourceFile.fileName,
             sourceFile
           );
         } catch {
@@ -58,7 +57,6 @@ export class ControllerClassVisitor extends AbstractFileVisitor {
     compilerNode: ts.MethodDeclaration,
     typeChecker: ts.TypeChecker,
     options: PluginOptions,
-    hostFilename: string,
     sourceFile: ts.SourceFile
   ): ts.MethodDeclaration {
     // Support both >= v4.8 and v4.7 and lower
@@ -105,7 +103,7 @@ export class ControllerClassVisitor extends AbstractFileVisitor {
               compilerNode,
               typeChecker,
               factory.createNodeArray(),
-              hostFilename
+              sourceFile
             )
           ]
         )
@@ -221,7 +219,7 @@ export class ControllerClassVisitor extends AbstractFileVisitor {
     node: ts.MethodDeclaration,
     typeChecker: ts.TypeChecker,
     existingProperties: ts.NodeArray<ts.PropertyAssignment> = factory.createNodeArray(),
-    hostFilename: string
+    sourceFile: ts.SourceFile
   ): ts.ObjectLiteralExpression {
     const properties = [
       ...existingProperties,
@@ -231,7 +229,7 @@ export class ControllerClassVisitor extends AbstractFileVisitor {
         node,
         typeChecker,
         existingProperties,
-        hostFilename
+        sourceFile
       )
     ];
     return factory.createObjectLiteralExpression(compact(properties));
@@ -242,7 +240,7 @@ export class ControllerClassVisitor extends AbstractFileVisitor {
     node: ts.MethodDeclaration,
     typeChecker: ts.TypeChecker,
     existingProperties: ts.NodeArray<ts.PropertyAssignment>,
-    hostFilename: string
+    sourceFile: ts.SourceFile
   ) {
     if (hasPropertyKey('type', existingProperties)) {
       return undefined;
@@ -252,14 +250,14 @@ export class ControllerClassVisitor extends AbstractFileVisitor {
     if (!type) {
       return undefined;
     }
-    let typeReference = getTypeReferenceAsString(type, typeChecker);
+    let typeReference = getTypeReferenceAsString(type, typeChecker, sourceFile);
     if (!typeReference) {
       return undefined;
     }
     if (typeReference.includes('node_modules')) {
       return undefined;
     }
-    typeReference = replaceImportPath(typeReference, hostFilename);
+    typeReference = replaceImportPath(typeReference, sourceFile.fileName);
     return factory.createPropertyAssignment(
       'type',
       factory.createIdentifier(typeReference)

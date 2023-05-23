@@ -214,7 +214,8 @@ export class ModelClassVisitor extends AbstractFileVisitor {
         node.type,
         typeChecker,
         existingProperties,
-        hostFilename
+        hostFilename,
+        sourceFile
       ),
       ...this.createDescriptionAndTsDocTagPropertyAssigments(
         factory,
@@ -252,7 +253,8 @@ export class ModelClassVisitor extends AbstractFileVisitor {
     node: ts.TypeNode,
     typeChecker: ts.TypeChecker,
     existingProperties: ts.NodeArray<ts.PropertyAssignment>,
-    hostFilename: string
+    hostFilename: string,
+    sourceFile: ts.SourceFile | undefined
   ): ts.PropertyAssignment[] {
     const key = 'type';
     if (hasPropertyKey(key, existingProperties)) {
@@ -309,7 +311,8 @@ export class ModelClassVisitor extends AbstractFileVisitor {
             remainingTypes[0],
             typeChecker,
             existingProperties,
-            hostFilename
+            hostFilename,
+            sourceFile
           );
 
           const resultArray = new Array<ts.PropertyAssignment>(
@@ -331,7 +334,7 @@ export class ModelClassVisitor extends AbstractFileVisitor {
     if (!type) {
       return [];
     }
-    let typeReference = getTypeReferenceAsString(type, typeChecker);
+    let typeReference = getTypeReferenceAsString(type, typeChecker, sourceFile);
     if (!typeReference) {
       return [];
     }
